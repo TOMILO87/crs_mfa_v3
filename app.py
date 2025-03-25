@@ -9,39 +9,39 @@ app = Flask(__name__)
 
 # Paths to the model and tokenizer files
 MODEL_PATHS = {
-    "biodiversity": "./models/biodiversity_model.keras",
-    "category": "./models/category_model.keras",
-    "climateadaptation": "./models/climateadaptation_model.keras",
-    "climatemitigation": "./models/climatemitigation_model.keras",
-    "dig": "./models/dig_model.keras",
-    "environment": "./models/environment_model.keras",
-    "gender": "./models/gender_model.keras",
-    "parenttype": "./models/parenttype_model.keras",
-    "rmnch": "./models/rmnch_model.keras",
+    "biodiversity": "/models/biodiversity_model.keras",
+    "category": "/models/category_model.keras",
+    "climateadaptation": "/models/climateadaptation_model.keras",
+    "climatemitigation": "/models/climatemitigation_model.keras",
+    "dig": "/models/dig_model.keras",
+    "environment": "/models/environment_model.keras",
+    "gender": "/models/gender_model.keras",
+    "parenttype": "/models/parenttype_model.keras",
+    "rmnch": "/models/rmnch_model.keras",
 }
 
 TOKENIZER_PATHS = {
-    "biodiversity": "./models/biodiversity_tokenizer.pickle",
-    "category": "./models/category_tokenizer.pickle",
-    "climateadaptation": "./models/climateadaptation_tokenizer.pickle",
-    "climatemitigation": "./models/climatemitigation_tokenizer.pickle",
-    "dig": "./models/dig_tokenizer.pickle",
-    "environment": "./models/environment_tokenizer.pickle",
-    "gender": "./models/gender_tokenizer.pickle",
-    "parenttype": "./models/parenttype_tokenizer.pickle",
-    "rmnch": "./models/rmnch_tokenizer.pickle",
+    "biodiversity": "/models/biodiversity_tokenizer.pickle",
+    "category": "/models/category_tokenizer.pickle",
+    "climateadaptation": "/models/climateadaptation_tokenizer.pickle",
+    "climatemitigation": "/models/climatemitigation_tokenizer.pickle",
+    "dig": "/models/dig_tokenizer.pickle",
+    "environment": "/models/environment_tokenizer.pickle",
+    "gender": "/models/gender_tokenizer.pickle",
+    "parenttype": "/models/parenttype_tokenizer.pickle",
+    "rmnch": "/models/rmnch_tokenizer.pickle",
 }
 
 LABEL_ENCODER_PATHS = {
-    "biodiversity": "./models/biodiversity_label_encoder.pickle",
-    "category": "./models/category_label_encoder.pickle",
-    "climateadaptation": "./models/climateadaptation_label_encoder.pickle",
-    "climatemitigation": "./models/climatemitigation_label_encoder.pickle",
-    "dig": "./models/dig_label_encoder.pickle",
-    "environment": "./models/environment_label_encoder.pickle",
-    "gender": "./models/gender_label_encoder.pickle",
-    "parenttype": "./models/parenttype_label_encoder.pickle",
-    "rmnch": "./models/rmnch_label_encoder.pickle",
+    "biodiversity": "/models/biodiversity_label_encoder.pickle",
+    "category": "/models/category_label_encoder.pickle",
+    "climateadaptation": "/models/climateadaptation_label_encoder.pickle",
+    "climatemitigation": "/models/climatemitigation_label_encoder.pickle",
+    "dig": "/models/dig_label_encoder.pickle",
+    "environment": "/models/environment_label_encoder.pickle",
+    "gender": "/models/gender_label_encoder.pickle",
+    "parenttype": "/models/parenttype_label_encoder.pickle",
+    "rmnch": "/models/rmnch_label_encoder.pickle",
 }
 
 CUSTOM_NAMES = {
@@ -196,5 +196,5 @@ if __name__ == "__main__":
         exit(1)
 
     app.run(debug=True, host="0.0.0.0")
-    #To run it locally
+    #To run it locally (path must also be ./model/...)
     #app.run(debug=True, host="0.0.0.0", port=5001)
