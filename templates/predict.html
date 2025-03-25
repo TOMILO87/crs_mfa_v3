@@ -353,10 +353,11 @@
 {{ request.form.get('description', '') }}</textarea
         >
         <div class="model-selection">
-          <h4>Välj fält (max 4 stycken):</h4>
+          <h4>Välj fält <span style="background-color: yellow;">(max 4 stycken)</span>:</h4>
           {% for model in model_names %}
           <label>
-            <input type="checkbox" name="selected_models" value="{{ model }}" />
+            <input type="checkbox" name="selected_models" value="{{ model }}"
+            {% if model in ["category", "parenttype", "climateadaptation", "climatemitigation"] %}checked{% endif %} />
             {{ custom_names.get(model, model.capitalize()) }}
           </label>
           {% endfor %}

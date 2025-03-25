@@ -196,5 +196,5 @@ if __name__ == "__main__":
         exit(1)
 
     app.run(debug=True, host="0.0.0.0")
-    # To run it locally
+    #To run it locally
     #app.run(debug=True, host="0.0.0.0", port=5001)
