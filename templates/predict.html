@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planit 🤖 assistent</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #eafaf1;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        resize: none;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      button.disabled-button {
+        background-color: #d3d3d3;
+        cursor: not-allowed;
+      }
+      .model-selection {
+        margin-bottom: 20px;
+      }
+      .model-selection label {
+        margin-right: 10px;
+      }
+      .prediction {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .prediction h3 {
+        margin-top: 0;
+      }
+      .prediction .probabilities {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .prediction .probabilities li {
+        margin: 5px 0;
+      }
+      .info-icon {
+        display: inline-block;
+        margin-left: 5px;
+        color: #007bff;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .loading {
+        margin-top: 10px;
+        text-align: center;
+      }
+      /* SVG loading circle animation */
+      .loading svg {
+        animation: rotate 1.5s linear infinite;
+        width: 50px;
+        height: 50px;
+      }
+
+      /* Circle path animation */
+      @keyframes rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Circle style */
+      .loading circle {
+        stroke: #4caf50;
+        stroke-width: 4;
+        fill: none;
+        stroke-linecap: round;
+        stroke-dasharray: 150;
+        stroke-dashoffset: 0;
+        animation: dash 1.5s ease-in-out infinite;
+      }
+
+      @keyframes dash {
+        0% {
+          stroke-dashoffset: 150;
+        }
+        50% {
+          stroke-dashoffset: 75;
+          transform: rotate(135deg);
+        }
+        100% {
+          stroke-dashoffset: 150;
+          transform: rotate(450deg);
+        }
+      }
+    </style>
+    <script>
+      function openInfoWindow() {
+        const infoContent = `
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Category Mapping</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 20px;
+                  padding: 20px;
+                  background-color: #f9f9f9;
+                  border: 1px solid #ccc;
+                  border-radius: 8px;
+                  color: #333;
+                  font-size: 12px;
+                  line-height: 1.6;
+                }
+                h2 {
+                  text-align: center;
+                  color: #4caf50;
+                }
+                ul {
+                  list-style-type: none;
+                  padding: 0;
+                }
+                li {
+                  margin: 5px 0;
+                }
+                strong {
+                  color: #333;
+                }
+              </style>
+            </head>
+            <body>
+              <h2>Sektorgrupper</h2>
+              <ul>
+                <li><strong>Education:</strong> Börjar med 11</li>
+                <li><strong>Health:</strong> Börjar med 12</li>
+                <li><strong>Population:</strong> Börjar med 13</li>
+                <li><strong>Water:</strong> Börjar med 14</li>
+                <li><strong>Government/CSO:</strong> Börjar med 15</li>
+                <li><strong>Welfare/Services:</strong> Börjar med 16</li>
+                <li><strong>Transport:</strong> Börjar med 21</li>
+                <li><strong>Communications:</strong> Börjar med 22</li>
+                <li><strong>Energy:</strong> Börjar med 23</li>
+                <li><strong>Finance:</strong> Börjar med 24</li>
+                <li><strong>Business:</strong> Börjar med 25</li>
+                <li><strong>Agriculture/Forestry/Fishing:</strong> Börjar med 31</li>
+                <li><strong>Industry/Mining/Construction:</strong> Börjar med 32</li>
+                <li><strong>Trade/Tourism:</strong> Börjar med 33</li>
+                <li><strong>Environment:</strong> Börjar med 41</li>
+                <li><strong>Humanitarian/Reconstruction:</strong> Börjar med 72, 73, eller 74</li>
+                <li><strong>Multisector/Budget/Unspecified:</strong> Börjar med 43, 5, 6, eller 9</li>
+              </ul>
+            </body>
+          </html>
+        `;
+        const newWindow = window.open("", "_blank", "width=500,height=400");
+        newWindow.document.write(infoContent);
+      }
+
+      // Enable/Disable button based on selected models and text input
+      function updateButtonState() {
+        const selectedModels = document.querySelectorAll(
+          'input[name="selected_models"]:checked'
+        );
+        const descriptionInput = document.querySelector(
+          'textarea[name="description"]'
+        );
+        const submitButton = document.querySelector('button[type="submit"]');
+
+        // Check if at least one model is selected and no more than four
+        const isValidModelCount =
+          selectedModels.length >= 1 && selectedModels.length <= 4;
+        // Check if the description input is not empty
+        const isDescriptionValid = descriptionInput.value.trim() !== "";
+
+        // Disable button if either condition is not met
+        if (!isValidModelCount || !isDescriptionValid) {
+          submitButton.disabled = true;
+          submitButton.classList.add("disabled-button");
+        } else {
+          submitButton.disabled = false;
+          submitButton.classList.remove("disabled-button");
+        }
+      }
+
+      // Handle submission with loading spinner
+      async function handleSubmit(event) {
+        event.preventDefault();
+        const description = document.querySelector(
+          'textarea[name="description"]'
+        ).value;
+        const selectedModels = Array.from(
+          document.querySelectorAll('input[name="selected_models"]:checked')
+        ).map((cb) => cb.value);
+
+        if (!description || selectedModels.length === 0) return;
+
+        // Show loading spinner while processing
+        document.getElementById("loading-spinner").style.display = "block";
+        document.getElementById("predictions").style.display = "none";
+
+        try {
+          const response = await fetch("/api/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              description,
+              selected_models: selectedModels,
+            }),
+          });
+          const data = await response.json();
+
+          document.getElementById("loading-spinner").style.display = "none";
+          document.getElementById("predictions").style.display = "block";
+
+          if (response.ok) {
+            labelMapping = (label) => {
+              if (label == "0") {
+                return "Ej relevant";
+              } else if (label == "1") {
+                return "Delsyfte";
+              } else if (label == "2") {
+                return "Huvudsyfte";
+              } else if (label == "A01") {
+                return "Generellt budgetstöd A01";
+              } else if (label == "A02") {
+                return "Sektor budgetstöd A02";
+              } else if (label == "B01") {
+                return "Kärnstöd NGO B01";
+              } else if (label == "B02") {
+                return "Kärnstöd multilateralt B02";
+              } else if (label == "B03") {
+                return "Programstöd B03";
+              } else if (label == "B04") {
+                return "Basket funds/pooled funding B04";
+              } else if (label == "C01") {
+                return "Projektstöd C01";
+              } else if (label == "D01") {
+                return "Personal givarlandet D01";
+              } else if (label == "D02") {
+                return "Övrig teknisk assistans D02";
+              } else if (label == "E01") {
+                return "Stipendier/Träning i givarlandet E01";
+              } else if (label == "E02") {
+                return "Studentkostnader E02";
+              } else if (label == "F01") {
+                return "Skuldavskrivningar F01";
+              } else if (label == "G01") {
+                return "Administrationskostnader G01";
+              } else if (label == "H01") {
+                return "Kommunikation om biståndet H01";
+              } else {
+                return label;
+              }
+            }
+
+            const predictionsDiv = document.getElementById("predictions");
+            predictionsDiv.innerHTML = "";
+            Object.keys(data).forEach((model) => {
+              const result = data[model];
+              predictionsDiv.innerHTML += `
+                <h3>
+                  <u>${model}:${model === "Sektor (grupp)" ? '<span class="info-icon" onclick="openInfoWindow()">ℹ️</span>' : ''}
+                  </u>
+                  </h3>
+                <p><strong>Förslag:</strong> ${labelMapping(result.label)}</p>
+                <h4>Förslag sannolikhet:</h4>
+                <ul class="probabilities">
+                  ${result.prediction_probabilities
+                    .slice(0, 3)
+                    .map(
+                      ([label, prob]) =>
+                        `<li>${labelMapping(label)}: ${(prob * 100).toFixed(2)}%</li>`
+                    )
+                    .join("")}
+                </ul>
+              `;
+            });
+            predictionsDiv.innerHTML = `<div class="prediction">${predictionsDiv.innerHTML}</div>`
+          } else {
+            document.getElementById(
+              "predictions"
+            ).innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+          }
+        } catch (error) {
+          document.getElementById("loading-spinner").style.display = "none";
+          document.getElementById(
+            "predictions"
+          ).innerHTML = `<p style="color: red;">An error occurred. Please try again later.</p>`;
+        }
+      }
+
+      // Initialize the form and button state
+      window.onload = function () {
+        const submitButton = document.querySelector('button[type="submit"]');
+        const descriptionInput = document.querySelector(
+          'textarea[name="description"]'
+        );
+        const modelCheckboxes = document.querySelectorAll(
+          'input[name="selected_models"]'
+        );
+
+        descriptionInput.addEventListener("input", updateButtonState);
+        modelCheckboxes.forEach((checkbox) => {
+          checkbox.addEventListener("change", updateButtonState);
+        });
+
+        submitButton.addEventListener("click", handleSubmit);
+
+        updateButtonState(); // Initialize button state based on the pre-selected models and description input
+      };
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Planit 🤖 assistent</h1>
+      <form action="/predict" method="POST">
+        <textarea
+          name="description"
+          rows="4"
+          placeholder="Insatsbeskrivning (engelska)..."
+        >
+{{ request.form.get('description', '') }}</textarea
+        >
+        <div class="model-selection">
+          <h4>Välj fält (max 4 stycken):</h4>
+          {% for model in model_names %}
+          <label>
+            <input type="checkbox" name="selected_models" value="{{ model }}" />
+            {{ custom_names.get(model, model.capitalize()) }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="disabled-button" disabled>
+          Få förslag
+        </button>
+      </form>
+
+      <div id="loading-spinner" class="loading" style="display: none">
+        <!-- SVG Loading Circle -->
+        <svg viewBox="0 0 50 50">
+          <circle cx="25" cy="25" r="20" />
+        </svg>
+      </div>
+
+      <div id="predictions">
+        {% if predictions %}
+        
+          {% for model, result in predictions.items() %}
+          <h3>Resultat:</h3>
+          <h4>
+            <u>
+              {{ custom_names.get(model, model.capitalize()) }}: {% if model ==
+              "category" %}
+              <span class="info-icon" onclick="openInfoWindow()">ℹ️</span>
+              {% endif %}
+            </u>
+          </h4>
+          <p><strong>Förslag:</strong> {{ result.label }}</p>
+          <h4>Förslag sannolikhet:</h4>
+          <ul class="probabilities">
+            {% for label, prob in result.prediction_probabilities[:3] %}
+            <li>{{ label }}: {{ (prob * 100) | round(2) }}%</li>
+            {% endfor %}
+          </ul>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>

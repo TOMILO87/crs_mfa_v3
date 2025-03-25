@@ -1,0 +1,9 @@
+# python
+venv/
+
+# pre-trained models and training data etc.
+/data
+/models
+
+# Files not used
+/OLD
